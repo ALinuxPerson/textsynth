@@ -3,6 +3,8 @@ A Rust wrapper for the [TextSynth API], a free (as of 01/19/2022) text synthesiz
 
 # Preparation
 
+You must have an API key in order to use this library.
+
 In order to get an API key, you must create an account at [TextSynth].
 
 After signing up and verifying your email address, you will be given an API key.
