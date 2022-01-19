@@ -21,7 +21,8 @@ We now need to create a `TextSynth` instance. This is where we can create engine
 the API key you got from the preparations to `TextSynth::new`.
 
 ```rust
-let textsynth = TextSynth::new("API_KEY");
+let api_key = String::from("<your-api-key>");
+let textsynth = TextSynth::new(api_key);
 ```
 
 We now need to create an `Engine`. An `Engine` is where the fun stuff takes place. This is where you can complete text
