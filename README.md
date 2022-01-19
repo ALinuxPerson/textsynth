@@ -117,5 +117,9 @@ while let Some(text_completion) = text_completion.next().await {
 }
 ```
 
+# License
+
+This is licensed under the MIT license.
+
 [TextSynth API]: https://textsynth.com
 [TextSynth]: https://textsynth.com
