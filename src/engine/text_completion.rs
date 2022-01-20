@@ -263,3 +263,45 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
             .pipe(Ok)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use once_cell::sync::OnceCell;
+    use parking_lot::{Mutex, MutexGuard};
+    use test_utils::text_synth;
+    use crate::prelude::CustomEngineDefinition;
+    use crate::test_utils;
+    use super::*;
+
+    static BUILDER: OnceCell<Mutex<TextCompletionBuilder>> = OnceCell::new();
+    static ENGINE_DEFINITION: EngineDefinition = EngineDefinition::Custom(
+        CustomEngineDefinition::r#static("custom", 1024)
+    );
+
+    #[test]
+    fn test_max_tokens_new() {
+        assert!(MaxTokens::new(1, &ENGINE_DEFINITION).is_some());
+        assert!(MaxTokens::new(1024, &ENGINE_DEFINITION).is_some());
+        assert!(MaxTokens::new(1025, &ENGINE_DEFINITION).is_none());
+    }
+
+    #[test]
+    fn test_max_tokens_inner() {
+        let max_tokens = MaxTokens::new(1, &ENGINE_DEFINITION).unwrap();
+        assert_eq!(max_tokens.inner(), 1);
+    }
+
+    #[test]
+    fn test_text_completion_builder_new() {
+        let builder = TextCompletionBuilder::new(text_synth::engine(), "fn main() {".into());
+        let _ = BUILDER.set(Mutex::new(builder));
+    }
+
+    fn wait_for_builder() -> MutexGuard<'static, TextCompletionBuilder<'static, 'static>> {
+        while BUILDER.get().is_none() {
+            std::thread::yield_now()
+        }
+
+        BUILDER.get().unwrap().lock()
+    }
+}
