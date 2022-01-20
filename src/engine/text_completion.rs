@@ -157,6 +157,10 @@ impl<S: Stream<Item = reqwest::Result<Bytes>> + Unpin> Stream for TextCompletion
     }
 }
 
+pub trait TextCompletionStreamLike: Stream<Item = TextCompletionStreamResult> {}
+
+impl<T: Stream<Item = TextCompletionStreamResult>> TextCompletionStreamLike for T {}
+
 /// A text completion builder.
 pub struct TextCompletionBuilder<'ts, 'e> {
     /// The engine used to create this text completion request.
@@ -255,11 +259,12 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
         self.now_impl(Some(stop)).await
     }
 
+
     /// Create a text completion stream.
     pub async fn stream(
         self,
         stop: Option<Stop>,
-    ) -> reqwest::Result<TextCompletionStream<impl Stream<Item = reqwest::Result<Bytes>>>> {
+    ) -> reqwest::Result<impl TextCompletionStreamLike> {
         let url = self.url();
         let request = TextCompletionRequest {
             prompt: self.prompt,
@@ -278,7 +283,12 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
             .send()
             .await?
             .bytes_stream()
-            .pipe(TextCompletionStream)
+            .map(|bytes|
+                bytes
+                    .map(|bytes| bytes.slice(..bytes.len() - 2))
+                    .map(|bytes| serde_json::from_slice::<crate::UntaggedResult<_>>(&bytes))
+                    .map(|result| result.map(Into::into))
+            )
             .pipe(Ok)
     }
 }
