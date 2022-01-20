@@ -255,7 +255,8 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
         self.now_impl(Some(stop)).await
     }
 
-    async fn stream_impl(
+    /// Create a text completion stream.
+    pub async fn stream(
         self,
         stop: Option<Stop>,
     ) -> reqwest::Result<TextCompletionStream<impl Stream<Item = reqwest::Result<Bytes>>>> {
@@ -279,21 +280,5 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
             .bytes_stream()
             .pipe(TextCompletionStream)
             .pipe(Ok)
-    }
-
-    /// Create a text completion stream.
-    pub async fn stream(
-        self,
-    ) -> reqwest::Result<TextCompletionStream<impl Stream<Item = reqwest::Result<Bytes>>>> {
-        self.stream_impl(None).await
-    }
-
-    /// Create a text completion stream which will stop when the given strings at `stop` are
-    /// encountered.
-    pub async fn stream_until(
-        self,
-        stop: Stop,
-    ) -> reqwest::Result<TextCompletionStream<impl Stream<Item = reqwest::Result<Bytes>>>> {
-        self.stream_impl(Some(stop)).await
     }
 }
