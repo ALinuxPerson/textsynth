@@ -152,3 +152,55 @@ impl EngineDefinition {
         self.to_custom_engine_definition().max_tokens
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_custom_engine_definition_static() {
+        let _ = CustomEngineDefinition::r#static("static", 42);
+    }
+
+    #[test]
+    fn test_custom_engine_definition_dynamic() {
+        let _ = CustomEngineDefinition::dynamic("dynamic".into(), 42);
+    }
+
+    #[test]
+    fn test_custom_engine_definition_new() {
+        let _ = CustomEngineDefinition::new("new", 42);
+        let _ = CustomEngineDefinition::new(String::from("new"), 42);
+    }
+
+    #[test]
+    fn test_engine_definition_to_custom_engine_definition() {
+        assert_eq!(EngineDefinition::GptJ6B.to_custom_engine_definition(), Cow::Owned(GptJ6B::AS_CUSTOM_ENGINE_DEFINITION));
+        assert_eq!(EngineDefinition::Boris6B.to_custom_engine_definition(), Cow::Owned(Boris6B::AS_CUSTOM_ENGINE_DEFINITION));
+        assert_eq!(EngineDefinition::FairseqGpt13B.to_custom_engine_definition(), Cow::Owned(FairseqGpt13B::AS_CUSTOM_ENGINE_DEFINITION));
+
+        let custom_engine_definition = CustomEngineDefinition::new("custom", 42);
+        let custom_engine_definition_clone = custom_engine_definition.clone();
+        let cow_custom_engine_definition = Cow::Borrowed(&custom_engine_definition_clone);
+        assert_eq!(
+            EngineDefinition::Custom(custom_engine_definition).to_custom_engine_definition(),
+            cow_custom_engine_definition,
+        );
+    }
+
+    #[test]
+    fn test_engine_definition_id() {
+        assert_eq!(EngineDefinition::GptJ6B.id(), GptJ6B::ID);
+        assert_eq!(EngineDefinition::Boris6B.id(), Boris6B::ID);
+        assert_eq!(EngineDefinition::FairseqGpt13B.id(), FairseqGpt13B::ID);
+        assert_eq!(EngineDefinition::Custom(CustomEngineDefinition::r#static("static", 42)).id(), "static");
+    }
+
+    #[test]
+    fn test_engine_definition_max_tokens() {
+        assert_eq!(EngineDefinition::GptJ6B.max_tokens(), GptJ6B::MAX_TOKENS);
+        assert_eq!(EngineDefinition::Boris6B.max_tokens(), Boris6B::MAX_TOKENS);
+        assert_eq!(EngineDefinition::FairseqGpt13B.max_tokens(), FairseqGpt13B::MAX_TOKENS);
+        assert_eq!(EngineDefinition::Custom(CustomEngineDefinition::r#static("static", 42)).max_tokens(), 42);
+    }
+}
