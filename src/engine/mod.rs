@@ -76,10 +76,11 @@ mod tests {
     async fn test_engine_log_probabilities() {
         let textsynth = test_utils::text_synth::engine();
         let continuation = NonEmptyString::new("dog".into()).unwrap();
-        textsynth.log_probabilities("The quick brown fox jumps over the lazy ".into(), continuation)
+        let log_probabilities = textsynth.log_probabilities("The quick brown fox jumps over the lazy ".into(), continuation)
             .await
             .expect("network error")
             .expect("api error");
+        crate::test_utils::cache::initialize_log_probabilities(log_probabilities)
     }
 
     #[test]
