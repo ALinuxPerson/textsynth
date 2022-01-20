@@ -124,6 +124,10 @@ while let Some(text_completion) = text_completion.next().await {
 
 Examples can be found on the [`examples`] directory.
 
+# Application
+
+An application which uses the library would be the [synthtext] program.
+
 # License
 
 This is licensed under the [MIT License].
@@ -132,3 +136,4 @@ This is licensed under the [MIT License].
 [TextSynth]: https://textsynth.com
 [MIT License]: LICENSE
 [`examples`]: examples
+[synthtext]: https://github.com/ALinuxPerson/synthtext
