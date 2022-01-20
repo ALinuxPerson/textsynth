@@ -43,3 +43,31 @@ impl TextSynth {
         self.client.post(url).bearer_auth(&self.api_key)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_utils;
+
+    #[test]
+    fn test_new_with_client() {
+        let _ = TextSynth::new_with_client(reqwest::Client::new(), test_utils::api_key().into());
+    }
+
+    #[test]
+    fn test_try_new() {
+        let _ = TextSynth::try_new(test_utils::api_key().into())
+            .expect("failed to create new textsynth client");
+    }
+
+    #[test]
+    fn test_new() {
+        let _ = TextSynth::new(test_utils::api_key().into());
+    }
+
+    #[test]
+    fn test_engine() {
+        let textsynth = TextSynth::new(test_utils::api_key().into());
+        let _ = textsynth.engine(EngineDefinition::GptJ6B);
+    }
+}
