@@ -222,8 +222,7 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
         format!("https://api.textsynth.com/v1/engines/{engine_id}/completions")
     }
 
-    /// Generate a text completion now.
-    pub async fn now(self) -> reqwest::Result<crate::Result<TextCompletion>> {
+    async fn now_impl(self, stop: Option<Stop>) -> reqwest::Result<crate::Result<TextCompletion>> {
         let url = self.url();
         let request = TextCompletionRequest {
             prompt: self.prompt,
@@ -232,7 +231,7 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
             top_k: self.top_k,
             top_p: self.top_p,
             stream: None,
-            stop: None,
+            stop,
         };
 
         self.engine
@@ -244,6 +243,16 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
             .json::<crate::UntaggedResult<_>>()
             .await
             .map(Into::into)
+    }
+
+    /// Generate a text completion now.
+    pub async fn now(self) -> reqwest::Result<crate::Result<TextCompletion>> {
+        self.now_impl(None).await
+    }
+
+    /// Generate a text completion now, stopping when the specified list of strings are found.
+    pub async fn now_until(self, stop: Stop) -> reqwest::Result<crate::Result<TextCompletion>> {
+        self.now_impl(Some(stop)).await
     }
 
     async fn stream_impl(
