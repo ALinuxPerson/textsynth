@@ -131,35 +131,10 @@ impl TextCompletion {
 pub type TextCompletionStreamResult =
     reqwest::Result<serde_json::Result<crate::Result<TextCompletion>>>;
 
-/// A stream of text completion responses from the API.
-pub struct TextCompletionStream<S: Stream<Item = reqwest::Result<Bytes>>>(S);
+/// A series of text completion responses from the API.
+pub trait TextCompletionStream: Stream<Item = TextCompletionStreamResult> {}
 
-impl<S: Stream<Item = reqwest::Result<Bytes>> + Unpin> Stream for TextCompletionStream<S> {
-    type Item = TextCompletionStreamResult;
-
-    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        async fn next<S: Stream<Item = reqwest::Result<Bytes>> + Unpin>(
-            this: &mut TextCompletionStream<S>,
-        ) -> Option<TextCompletionStreamResult> {
-            this.0.next().await.map(|result| {
-                result
-                    .map(|bytes| bytes.slice(..bytes.len() - 2))
-                    .map(|bytes| {
-                        serde_json::from_slice::<crate::UntaggedResult<TextCompletion>>(&bytes)
-                    })
-                    .map(|result| result.map(Into::into))
-            })
-        }
-
-        let output = next(self.deref_mut());
-        futures::pin_mut!(output);
-        output.poll(cx)
-    }
-}
-
-pub trait TextCompletionStreamLike: Stream<Item = TextCompletionStreamResult> {}
-
-impl<T: Stream<Item = TextCompletionStreamResult>> TextCompletionStreamLike for T {}
+impl<T: Stream<Item = TextCompletionStreamResult>> TextCompletionStream for T {}
 
 /// A text completion builder.
 pub struct TextCompletionBuilder<'ts, 'e> {
@@ -259,12 +234,8 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
         self.now_impl(Some(stop)).await
     }
 
-
     /// Create a text completion stream.
-    pub async fn stream(
-        self,
-        stop: Option<Stop>,
-    ) -> reqwest::Result<impl TextCompletionStreamLike> {
+    pub async fn stream(self) -> reqwest::Result<impl TextCompletionStream> {
         let url = self.url();
         let request = TextCompletionRequest {
             prompt: self.prompt,
@@ -273,7 +244,7 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
             top_k: self.top_k,
             top_p: self.top_p,
             stream: Some(true),
-            stop,
+            stop: None,
         };
 
         self.engine
