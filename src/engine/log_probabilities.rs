@@ -61,3 +61,33 @@ impl LogProbabilities {
         self.total_tokens
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_non_empty_string_new() {
+        let empty = String::new();
+        let non_empty = String::from("textsynth");
+
+        assert!(NonEmptyString::new(empty).is_none());
+        assert!(NonEmptyString::new(non_empty).is_some());
+    }
+
+    #[test]
+    fn test_non_empty_string_inner() {
+        let s = String::from("textsynth");
+        let non_empty = NonEmptyString::new(s).unwrap();
+
+        assert_eq!(non_empty.inner(), "textsynth");
+    }
+
+    #[test]
+    fn test_non_empty_string_into_inner() {
+        let s = String::from("textsynth");
+        let non_empty = NonEmptyString::new(s).unwrap();
+
+        assert_eq!(non_empty.into_inner(), "textsynth");
+    }
+}

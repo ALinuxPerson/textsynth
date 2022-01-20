@@ -88,12 +88,5 @@ mod tests {
         let _ = textsynth.text_completion("The quick brown fox jumps over the lazy ".into());
     }
 
-    #[test]
-    fn test_non_empty_string_new() {
-        let empty = String::new();
-        let non_empty = String::from("textsynth");
 
-        assert!(NonEmptyString::new(empty).is_none());
-        assert!(NonEmptyString::new(non_empty).is_some());
-    }
 }
