@@ -267,6 +267,7 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::atomic::{AtomicBool, Ordering};
     use once_cell::sync::OnceCell;
     use parking_lot::{Mutex, MutexGuard};
     use test_utils::text_synth;
@@ -278,6 +279,32 @@ mod tests {
     static ENGINE_DEFINITION: EngineDefinition = EngineDefinition::Custom(
         CustomEngineDefinition::r#static("custom", 1024)
     );
+    static KEYS: Keys = Keys::DEFAULT;
+    const ORDERING: Ordering = Ordering::SeqCst;
+
+    struct Keys {
+        max_tokens: AtomicBool,
+        temperature: AtomicBool,
+        top_k: AtomicBool,
+        top_p: AtomicBool,
+    }
+
+    impl Keys {
+        #[allow(clippy::declare_interior_mutable_const)]
+        const DEFAULT: Self = Self {
+            max_tokens: AtomicBool::new(false),
+            temperature: AtomicBool::new(false),
+            top_k: AtomicBool::new(false),
+            top_p: AtomicBool::new(false),
+        };
+
+        pub fn unlocked(&self) -> bool {
+            self.max_tokens.load(ORDERING)
+                && self.temperature.load(ORDERING)
+                && self.top_k.load(ORDERING)
+                && self.top_p.load(ORDERING)
+        }
+    }
 
     #[test]
     fn test_max_tokens_new() {
@@ -304,5 +331,114 @@ mod tests {
         }
 
         BUILDER.get().unwrap().lock()
+    }
+
+    #[test]
+    fn test_text_completion_max_tokens() {
+        let mut lock = wait_for_builder();
+        let max_tokens = MaxTokens::new(128, &text_synth::ENGINE_DEFINITION).unwrap();
+        let builder = lock.clone().max_tokens(max_tokens);
+        KEYS.max_tokens.store(true, ORDERING);
+        *lock = builder;
+    }
+
+    #[test]
+    fn test_text_completion_temperature() {
+        let mut lock = wait_for_builder();
+        let builder = lock.clone().temperature(0.5);
+        KEYS.temperature.store(true, ORDERING);
+        *lock = builder;
+    }
+
+    #[test]
+    fn test_text_completion_top_k() {
+        let mut lock = wait_for_builder();
+        let top_k = TopK::new(128).unwrap();
+        let builder = lock.clone().top_k(top_k);
+        KEYS.top_k.store(true, ORDERING);
+        *lock = builder;
+    }
+
+    #[test]
+    fn test_text_completion_top_p() {
+        let mut lock = wait_for_builder();
+        let top_p = TopP::new(0.5).unwrap();
+        let builder = lock.clone().top_p(top_p);
+        KEYS.top_p.store(true, ORDERING);
+        *lock = builder;
+    }
+
+    fn wait_for_keys_to_be_unlocked() {
+        while !KEYS.unlocked() {
+            std::thread::yield_now()
+        }
+    }
+
+    #[tokio::test]
+    async fn test_text_completion_now_and_friends() {
+        wait_for_keys_to_be_unlocked();
+        let text_completion = wait_for_builder()
+            .clone()
+            .now()
+            .await
+            .expect("network error")
+            .expect("api error");
+        assert!(
+            text_completion.total_tokens().is_some(),
+            "expected total tokens of immediate text completion to exist since it is not streamed",
+        );
+        let _ = text_completion.text();
+        let _ = text_completion.truncated_prompt();
+        let _ = text_completion.reached_end();
+    }
+
+    #[tokio::test]
+    async fn test_text_completion_truncated_prompt_if_prompt_too_long() {
+        wait_for_keys_to_be_unlocked();
+        let mut builder = wait_for_builder().clone();
+
+        // v
+        builder.prompt = format!("fn main() {{\n{}}}", "println('Hello World')\n".repeat(2048));
+
+        let text_completion = builder.now().await.expect("network error").expect("api error");
+        assert!(text_completion.truncated_prompt())
+    }
+
+    #[tokio::test]
+    async fn test_text_completion_now_until() {
+        wait_for_keys_to_be_unlocked();
+        let _ = wait_for_builder()
+            .clone()
+            .now_until(Stop::try_from(&["RwLock".into()][..]).unwrap())
+            .await
+            .expect("network error")
+            .expect("api error");
+    }
+
+    #[tokio::test]
+    async fn test_text_completion_stream() {
+        fn unwrap_text_completion(text_completion: Option<&TextCompletionStreamResult>) -> &TextCompletion {
+            text_completion
+                .expect("at least one text completion")
+                .as_ref()
+                .expect("network error")
+                .as_ref()
+                .expect("json error")
+                .as_ref()
+                .expect("api error")
+        }
+
+        wait_for_keys_to_be_unlocked();
+        let stream: Vec<TextCompletionStreamResult> = wait_for_builder()
+            .clone()
+            .stream()
+            .await
+            .expect("network error")
+            .collect()
+            .await;
+        let first_text_completion = stream.first().pipe(unwrap_text_completion);
+        assert!(first_text_completion.total_tokens().is_none());
+        let last_text_completion = stream.last().pipe(unwrap_text_completion);
+        assert!(last_text_completion.total_tokens().is_some());
     }
 }
