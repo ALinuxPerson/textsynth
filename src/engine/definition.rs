@@ -72,7 +72,7 @@ impl private::Sealed for FairseqGpt13B {}
 
 /// A custom engine definition which may or may not exist.
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_derives", derive(serde::Serialize, serde::Deserialize))]
 pub struct CustomEngineDefinition {
     /// The id of this engine definition.
     pub id: Cow<'static, str>,
@@ -111,7 +111,7 @@ impl CustomEngineDefinition {
 
 /// Engine definitions supported by this crate.
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde_derives", derive(serde::Serialize, serde::Deserialize))]
 pub enum EngineDefinition {
     /// See [`GptJ6B`] for documentation.
     GptJ6B,
