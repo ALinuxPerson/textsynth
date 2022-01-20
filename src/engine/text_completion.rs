@@ -23,7 +23,7 @@ pub struct MaxTokens(usize);
 impl MaxTokens {
     /// Creates a new maximum number of tokens. Ensured to be valid for the given engine definition.
     pub fn new(max_tokens: usize, engine_definition: &EngineDefinition) -> Option<Self> {
-        if max_tokens < engine_definition.max_tokens() {
+        if max_tokens <= engine_definition.max_tokens() {
             Some(Self(max_tokens))
         } else {
             None
