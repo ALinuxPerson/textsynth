@@ -21,4 +21,5 @@ serde_derives = []
 
 [dev-dependencies]
 anyhow = "1.0.52"
+dotenv = "0.15.0"
 tokio = { version = "1.15.0", features = ["rt-multi-thread", "macros"] }
