@@ -16,7 +16,6 @@ mod test_utils {
         use once_cell::sync::OnceCell;
 
         static INITIALIZED: AtomicBool = AtomicBool::new(false);
-        static FAILED_TO_INITIALIZE: AtomicBool = AtomicBool::new(false);
         static LAST_ERROR: OnceCell<Arc<dotenv::Error>> = OnceCell::new();
         const ORDERING: Ordering = Ordering::SeqCst;
 
@@ -43,8 +42,11 @@ mod test_utils {
     use std::env;
     use once_cell::sync::Lazy;
 
-    static API_KEY: Lazy<String> = Lazy::new(|| env::var("API_KEY")
-        .expect("pass an api key to run the tests"));
+    static API_KEY: Lazy<String> = Lazy::new(|| {
+        dotenv::initialize();
+        env::var("API_KEY")
+            .expect("pass an api key to run the tests")
+    });
 
     pub fn api_key() -> &'static str {
         &API_KEY
