@@ -137,6 +137,7 @@ pub trait TextCompletionStream: Stream<Item = TextCompletionStreamResult> {}
 impl<T: Stream<Item = TextCompletionStreamResult>> TextCompletionStream for T {}
 
 /// A text completion builder.
+#[derive(Clone)]
 pub struct TextCompletionBuilder<'ts, 'e> {
     /// The engine used to create this text completion request.
     pub engine: &'e Engine<'ts>,
