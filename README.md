@@ -120,6 +120,10 @@ while let Some(text_completion) = text_completion.next().await {
 }
 ```
 
+# Examples
+
+Examples can be found on the [`examples`] directory.
+
 # License
 
 This is licensed under the [MIT License].
@@ -127,3 +131,4 @@ This is licensed under the [MIT License].
 [TextSynth API]: https://textsynth.com
 [TextSynth]: https://textsynth.com
 [MIT License]: LICENSE
+[`examples`]: examples
