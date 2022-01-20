@@ -138,12 +138,12 @@ impl EngineDefinition {
     }
 
     /// Get the id of this engine definition.
-    pub fn id(&self) -> Cow<str> {
+    pub fn id(&self) -> &str {
         match self {
-            Self::GptJ6B => Cow::Borrowed(GptJ6B::ID),
-            Self::Boris6B => Cow::Borrowed(Boris6B::ID),
-            Self::FairseqGpt13B => Cow::Borrowed(FairseqGpt13B::ID),
-            Self::Custom(custom_engine) => Cow::Borrowed(&custom_engine.id),
+            Self::GptJ6B => GptJ6B::ID,
+            Self::Boris6B => Boris6B::ID,
+            Self::FairseqGpt13B => FairseqGpt13B::ID,
+            Self::Custom(custom_engine) => &custom_engine.id,
         }
     }
 
