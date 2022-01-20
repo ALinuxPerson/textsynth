@@ -38,6 +38,23 @@ mod test_utils {
             }
         }
     }
+    pub mod text_synth {
+        use once_cell::sync::{Lazy, OnceCell};
+        use crate::core::TextSynth;
+        use crate::engine::Engine;
+        use crate::prelude::EngineDefinition;
+
+        static TEXT_SYNTH: OnceCell<TextSynth> = OnceCell::new();
+        static ENGINE: Lazy<Engine> = Lazy::new(|| get().engine(EngineDefinition::GptJ6B));
+
+        pub fn get() -> &'static TextSynth {
+            TEXT_SYNTH.get_or_init(|| TextSynth::new(super::api_key().into()))
+        }
+
+        pub fn engine() -> &'static Engine<'static> {
+            &ENGINE
+        }
+    }
 
     use std::env;
     use once_cell::sync::Lazy;
