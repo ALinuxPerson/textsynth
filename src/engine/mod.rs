@@ -60,3 +60,40 @@ impl<'ts> Engine<'ts> {
         TextCompletionBuilder::new(self, prompt)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::test_utils;
+    use super::*;
+
+    #[test]
+    fn test_engine_new() {
+        let textsynth = test_utils::text_synth::get();
+        let _ = Engine::new(textsynth, EngineDefinition::GptJ6B);
+    }
+
+    #[tokio::test]
+    async fn test_engine_log_probabilities() {
+        let textsynth = test_utils::text_synth::engine();
+        let continuation = NonEmptyString::new("dog".into()).unwrap();
+        textsynth.log_probabilities("The quick brown fox jumps over the lazy ".into(), continuation)
+            .await
+            .expect("network error")
+            .expect("api error");
+    }
+
+    #[test]
+    fn test_engine_text_completion() {
+        let textsynth = test_utils::text_synth::engine();
+        let _ = textsynth.text_completion("The quick brown fox jumps over the lazy ".into());
+    }
+
+    #[test]
+    fn test_non_empty_string_new() {
+        let empty = String::new();
+        let non_empty = String::from("textsynth");
+
+        assert!(NonEmptyString::new(empty).is_none());
+        assert!(NonEmptyString::new(non_empty).is_some());
+    }
+}
