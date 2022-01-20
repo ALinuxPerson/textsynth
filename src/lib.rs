@@ -68,6 +68,10 @@ mod test_utils {
         pub fn get_log_probabilities() -> &'static LogProbabilities {
             LOG_PROBABILITIES.get().expect("log probabilities not initialized")
         }
+
+        pub fn is_log_probabilities_initialized() -> bool {
+            LOG_PROBABILITIES.get().is_some()
+        }
     }
 
     use std::env;
