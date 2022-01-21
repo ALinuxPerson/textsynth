@@ -1,4 +1,5 @@
-use once_cell::sync::{Lazy, OnceCell};
+use once_cell::sync::Lazy;
+use tokio::runtime::Runtime;
 use crate::prelude::{LogProbabilities, NonEmptyString};
 use crate::test_utils::text_synth;
 
@@ -65,7 +66,7 @@ pub static LOG_PROBABILITIES: Lazy<LogProbabilities> = Lazy::new(|| {
             .expect("api error")
     };
 
-    futures::executor::block_on(async_fn)
+    Runtime::new().unwrap().block_on(async_fn)
 });
 
 pub fn log_probabilities() -> &'static LogProbabilities {
