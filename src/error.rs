@@ -52,3 +52,41 @@ impl fmt::Debug for Error {
 }
 
 impl StdError for Error {}
+
+#[cfg(test)]
+mod tests {
+    use std::ops::Deref;
+    use once_cell::sync::Lazy;
+    use super::*;
+
+    static ERROR: Lazy<Error> = Lazy::new(|| {
+        Error {
+            status: NonZeroU16::new(400).unwrap(),
+            error: "Bad Request".to_string(),
+            status_code: OnceCell::new(),
+        }
+    });
+
+    #[test]
+    fn test_error_display() {
+        assert_eq!(format!("{}", ERROR.deref()), "400 Bad Request, Bad Request");
+    }
+
+    #[test]
+    fn test_error_debug() {
+        assert_eq!(
+            format!("{:?}", ERROR.deref()),
+            "Error { status_code: 400, error: \"Bad Request\" }"
+        );
+    }
+
+    #[test]
+    fn test_status_code() {
+        let _ = ERROR.status_code();
+    }
+
+    #[test]
+    fn test_message() {
+        let _ = ERROR.message();
+    }
+}
