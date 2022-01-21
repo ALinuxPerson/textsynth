@@ -1,7 +1,13 @@
-# textsynth
-![crates.io](https://img.shields.io/crates/v/textsynth.svg)
-![docs.rs](https://docs.rs/textsynth/badge.svg)
-A Rust wrapper for the [TextSynth API], a free (as of 01/19/2022) text synthesization service.
+<div align="center">
+    <h1><b>TextSynth</b></h1>
+    <a href="https://www.crates.io/crates/textsynth">
+        <img src="https://img.shields.io/crates/v/textsynth.svg">
+    </a>
+    <a href="https://www.docs.rs/textsynth">
+        <img src="https://docs.rs/textsynth/badge.svg">
+    </a>
+    <p>A Rust wrapper for the <a href="https://textsynth.com">TextSynth API</a>, a free (as of 01/21/22) text synthesization service.</p>
+</div>
 
 # Preparation
 
