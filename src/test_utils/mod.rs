@@ -1,6 +1,8 @@
+#[macro_use]
+pub mod cache;
+
 pub mod dotenv;
 pub mod text_synth;
-pub mod cache;
 
 use std::env;
 use once_cell::sync::Lazy;
