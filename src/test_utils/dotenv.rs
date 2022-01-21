@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use anyhow::Context;
+
 use once_cell::sync::OnceCell;
 
 static INITIALIZED: AtomicBool = AtomicBool::new(false);

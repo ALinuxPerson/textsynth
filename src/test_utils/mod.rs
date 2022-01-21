@@ -7,7 +7,7 @@ pub mod text_synth;
 use std::env;
 use std::time::Duration;
 use once_cell::sync::Lazy;
-use tap::Pipe;
+
 
 static API_KEY: Lazy<String> = Lazy::new(|| {
     dotenv::initialize();
