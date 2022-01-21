@@ -64,7 +64,6 @@ impl LogProbabilities {
 
 #[cfg(test)]
 mod tests {
-    use once_cell::sync::Lazy;
     use crate::test_utils;
     use super::*;
 
@@ -93,30 +92,18 @@ mod tests {
         assert_eq!(non_empty.into_inner(), "textsynth");
     }
 
-    fn wait_for_log_probabilities_to_be_initialized() -> &'static LogProbabilities {
-        // spin until log probabilities are initialized
-        while !test_utils::cache::is_log_probabilities_initialized() {
-            std::thread::yield_now()
-        }
-
-        test_utils::cache::get_log_probabilities()
-    }
-
     #[test]
     fn test_log_probabilities_log_probability() {
-        let log_probabilities = wait_for_log_probabilities_to_be_initialized();
-        let _ =  log_probabilities.log_probability();
+        let _ = test_utils::cache::log_probabilities().log_probability();
     }
 
     #[test]
     fn test_log_probabilities_is_greedy() {
-        let log_probabilities = wait_for_log_probabilities_to_be_initialized();
-        let _ =  log_probabilities.is_greedy();
+        let _ = test_utils::cache::log_probabilities().is_greedy();
     }
 
     #[test]
     fn test_log_probabilities_total_tokens() {
-        let log_probabilities = wait_for_log_probabilities_to_be_initialized();
-        let _ =  log_probabilities.total_tokens();
+        let _ = test_utils::cache::log_probabilities().total_tokens();
     }
 }

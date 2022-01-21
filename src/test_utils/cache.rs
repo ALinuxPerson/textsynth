@@ -55,8 +55,7 @@ macro_rules! fallible_cache {
     };
 }
 
-static LOG_PROBABILITIES: OnceCell<LogProbabilities> = OnceCell::new();
-pub static LAZY_LOG_PROBABILITIES: Lazy<LogProbabilities> = Lazy::new(|| {
+pub static LOG_PROBABILITIES: Lazy<LogProbabilities> = Lazy::new(|| {
     let async_fn = async {
         let textsynth = text_synth::engine();
         let continuation = NonEmptyString::new("dog".into()).unwrap();
@@ -69,14 +68,6 @@ pub static LAZY_LOG_PROBABILITIES: Lazy<LogProbabilities> = Lazy::new(|| {
     futures::executor::block_on(async_fn)
 });
 
-pub fn initialize_log_probabilities(log_probabilities: LogProbabilities) {
-    let _ = LOG_PROBABILITIES.set(log_probabilities);
-}
-
-pub fn get_log_probabilities() -> &'static LogProbabilities {
-    LOG_PROBABILITIES.get().expect("log probabilities not initialized")
-}
-
-pub fn is_log_probabilities_initialized() -> bool {
-    LOG_PROBABILITIES.get().is_some()
+pub fn log_probabilities() -> &'static LogProbabilities {
+    &LOG_PROBABILITIES
 }

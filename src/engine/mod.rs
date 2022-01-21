@@ -75,7 +75,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_engine_log_probabilities() {
-        let _ = Lazy::force(&test_utils::cache::LAZY_LOG_PROBABILITIES);
+        let _ = Lazy::force(&test_utils::cache::LOG_PROBABILITIES);
     }
 
     #[test]
