@@ -55,16 +55,14 @@ impl StdError for Error {}
 
 #[cfg(test)]
 mod tests {
-    use std::ops::Deref;
-    use once_cell::sync::Lazy;
     use super::*;
+    use once_cell::sync::Lazy;
+    use std::ops::Deref;
 
-    static ERROR: Lazy<Error> = Lazy::new(|| {
-        Error {
-            status: NonZeroU16::new(400).unwrap(),
-            error: "Bad Request".to_string(),
-            status_code: OnceCell::new(),
-        }
+    static ERROR: Lazy<Error> = Lazy::new(|| Error {
+        status: NonZeroU16::new(400).unwrap(),
+        error: "Bad Request".to_string(),
+        status_code: OnceCell::new(),
     });
 
     #[test]
