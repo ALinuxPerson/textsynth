@@ -6,7 +6,7 @@
     <a href="https://www.docs.rs/textsynth">
         <img src="https://docs.rs/textsynth/badge.svg">
     </a>
-    <p>A Rust wrapper for the <a href="https://textsynth.com">TextSynth API</a>, a free (as of 01/21/22) text synthesization service.</p>
+    <p>A (unofficial) Rust wrapper for the <a href="https://textsynth.com">TextSynth API</a>, a free (as of 01/21/22) text synthesization service.</p>
 </div>
 
 # Preparation
