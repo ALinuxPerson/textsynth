@@ -267,44 +267,26 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::atomic::{AtomicBool, Ordering};
-    use once_cell::sync::OnceCell;
-    use parking_lot::{Mutex, MutexGuard};
+    use once_cell::sync::Lazy;
     use test_utils::text_synth;
     use crate::prelude::CustomEngineDefinition;
     use crate::test_utils;
     use super::*;
 
-    static BUILDER: OnceCell<Mutex<TextCompletionBuilder>> = OnceCell::new();
+    static YOU_SHOULD_CLONE_THIS_BUILDER: Lazy<TextCompletionBuilder> = Lazy::new(|| {
+        text_synth::engine().text_completion("fn main() {".into())
+    });
+    static BUILDER: Lazy<TextCompletionBuilder> = Lazy::new(|| {
+        YOU_SHOULD_CLONE_THIS_BUILDER
+            .clone()
+            .max_tokens(MaxTokens::new(128, &text_synth::ENGINE_DEFINITION).unwrap())
+            .temperature(0.5)
+            .top_k(TopK::new(128).unwrap())
+            .top_p(TopP::new(0.5).unwrap())
+    });
     static ENGINE_DEFINITION: EngineDefinition = EngineDefinition::Custom(
         CustomEngineDefinition::r#static("custom", 1024)
     );
-    static KEYS: Keys = Keys::DEFAULT;
-    const ORDERING: Ordering = Ordering::SeqCst;
-
-    struct Keys {
-        max_tokens: AtomicBool,
-        temperature: AtomicBool,
-        top_k: AtomicBool,
-        top_p: AtomicBool,
-    }
-
-    impl Keys {
-        #[allow(clippy::declare_interior_mutable_const)]
-        const DEFAULT: Self = Self {
-            max_tokens: AtomicBool::new(false),
-            temperature: AtomicBool::new(false),
-            top_k: AtomicBool::new(false),
-            top_p: AtomicBool::new(false),
-        };
-
-        pub fn unlocked(&self) -> bool {
-            self.max_tokens.load(ORDERING)
-                && self.temperature.load(ORDERING)
-                && self.top_k.load(ORDERING)
-                && self.top_p.load(ORDERING)
-        }
-    }
 
     #[test]
     fn test_max_tokens_new() {
@@ -321,63 +303,35 @@ mod tests {
 
     #[test]
     fn test_text_completion_builder_new() {
-        let builder = TextCompletionBuilder::new(text_synth::engine(), "fn main() {".into());
-        let _ = BUILDER.set(Mutex::new(builder));
-    }
-
-    fn wait_for_builder() -> MutexGuard<'static, TextCompletionBuilder<'static, 'static>> {
-        while BUILDER.get().is_none() {
-            std::thread::yield_now()
-        }
-
-        BUILDER.get().unwrap().lock()
+        let _ = TextCompletionBuilder::new(text_synth::engine(), "fn main() {".into());
     }
 
     #[test]
     fn test_text_completion_max_tokens() {
-        let mut lock = wait_for_builder();
         let max_tokens = MaxTokens::new(128, &text_synth::ENGINE_DEFINITION).unwrap();
-        let builder = lock.clone().max_tokens(max_tokens);
-        KEYS.max_tokens.store(true, ORDERING);
-        *lock = builder;
+        let _ = YOU_SHOULD_CLONE_THIS_BUILDER.clone().max_tokens(max_tokens);
     }
 
     #[test]
     fn test_text_completion_temperature() {
-        let mut lock = wait_for_builder();
-        let builder = lock.clone().temperature(0.5);
-        KEYS.temperature.store(true, ORDERING);
-        *lock = builder;
+        let _ = YOU_SHOULD_CLONE_THIS_BUILDER.clone().temperature(0.5);
     }
 
     #[test]
     fn test_text_completion_top_k() {
-        let mut lock = wait_for_builder();
         let top_k = TopK::new(128).unwrap();
-        let builder = lock.clone().top_k(top_k);
-        KEYS.top_k.store(true, ORDERING);
-        *lock = builder;
+        let _ = YOU_SHOULD_CLONE_THIS_BUILDER.clone().top_k(top_k);
     }
 
     #[test]
     fn test_text_completion_top_p() {
-        let mut lock = wait_for_builder();
         let top_p = TopP::new(0.5).unwrap();
-        let builder = lock.clone().top_p(top_p);
-        KEYS.top_p.store(true, ORDERING);
-        *lock = builder;
-    }
-
-    fn wait_for_keys_to_be_unlocked() {
-        while !KEYS.unlocked() {
-            std::thread::yield_now()
-        }
+        let _ = YOU_SHOULD_CLONE_THIS_BUILDER.clone().top_p(top_p);
     }
 
     #[tokio::test]
     async fn test_text_completion_now_and_friends() {
-        wait_for_keys_to_be_unlocked();
-        let text_completion = wait_for_builder()
+        let text_completion = BUILDER
             .clone()
             .now()
             .await
@@ -394,8 +348,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_text_completion_truncated_prompt_if_prompt_too_long() {
-        wait_for_keys_to_be_unlocked();
-        let mut builder = wait_for_builder().clone();
+        let mut builder = BUILDER.clone();
 
         // v
         builder.prompt = format!("fn main() {{\n{}}}", "println('Hello World')\n".repeat(2048));
@@ -406,8 +359,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_text_completion_now_until() {
-        wait_for_keys_to_be_unlocked();
-        let _ = wait_for_builder()
+        let _ = BUILDER
             .clone()
             .now_until(Stop::try_from(&["RwLock".into()][..]).unwrap())
             .await
@@ -428,8 +380,7 @@ mod tests {
                 .expect("api error")
         }
 
-        wait_for_keys_to_be_unlocked();
-        let stream: Vec<TextCompletionStreamResult> = wait_for_builder()
+        let stream: Vec<TextCompletionStreamResult> = BUILDER
             .clone()
             .stream()
             .await
