@@ -63,6 +63,7 @@ impl<'ts> Engine<'ts> {
 
 #[cfg(test)]
 mod tests {
+    use once_cell::sync::Lazy;
     use crate::test_utils;
     use super::*;
 
@@ -74,13 +75,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_engine_log_probabilities() {
-        let textsynth = test_utils::text_synth::engine();
-        let continuation = NonEmptyString::new("dog".into()).unwrap();
-        let log_probabilities = textsynth.log_probabilities("The quick brown fox jumps over the lazy ".into(), continuation)
-            .await
-            .expect("network error")
-            .expect("api error");
-        crate::test_utils::cache::initialize_log_probabilities(log_probabilities)
+        let _ = Lazy::force(&test_utils::cache::LAZY_LOG_PROBABILITIES);
     }
 
     #[test]
@@ -88,6 +83,4 @@ mod tests {
         let textsynth = test_utils::text_synth::engine();
         let _ = textsynth.text_completion("The quick brown fox jumps over the lazy ".into());
     }
-
-
 }

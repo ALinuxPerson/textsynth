@@ -64,8 +64,13 @@ impl LogProbabilities {
 
 #[cfg(test)]
 mod tests {
+    use once_cell::sync::Lazy;
     use crate::test_utils;
     use super::*;
+
+    static LOG_PROBABILITIES: Lazy<LogProbabilities> = Lazy::new(|| {
+
+    })
 
     #[test]
     fn test_non_empty_string_new() {

@@ -23,6 +23,7 @@ pub fn api_key() -> &'static str {
     &API_KEY
 }
 
+#[allow(dead_code)]
 pub fn timeout() -> Option<Duration> {
     *TIMEOUT
 }

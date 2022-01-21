@@ -1,6 +1,8 @@
-use once_cell::sync::OnceCell;
-use crate::prelude::LogProbabilities;
+use once_cell::sync::{Lazy, OnceCell};
+use crate::prelude::{LogProbabilities, NonEmptyString};
+use crate::test_utils::text_synth;
 
+#[allow(unused_macros)]
 macro_rules! fallible_cache {
     (
         $vis:vis mod $cache_name:ident {
@@ -11,6 +13,7 @@ macro_rules! fallible_cache {
             const INITIALIZER = $initializer:expr;
         }
     ) => {
+        #[allow(dead_code)]
         $vis mod $cache_name {
             use once_cell::sync::OnceCell;
             $(use $item;)*
@@ -53,6 +56,18 @@ macro_rules! fallible_cache {
 }
 
 static LOG_PROBABILITIES: OnceCell<LogProbabilities> = OnceCell::new();
+pub static LAZY_LOG_PROBABILITIES: Lazy<LogProbabilities> = Lazy::new(|| {
+    let async_fn = async {
+        let textsynth = text_synth::engine();
+        let continuation = NonEmptyString::new("dog".into()).unwrap();
+        let log_probabilities = textsynth.log_probabilities("The quick brown fox jumps over the lazy ".into(), continuation)
+            .await
+            .expect("network error")
+            .expect("api error");
+    };
+
+    futures::executor::block_on(async_fn)
+});
 
 pub fn initialize_log_probabilities(log_probabilities: LogProbabilities) {
     let _ = LOG_PROBABILITIES.set(log_probabilities);
