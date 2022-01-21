@@ -7,9 +7,6 @@ use arrayvec::ArrayVec;
 use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
 
-
-
-
 use tap::Pipe;
 
 /// Maximum number of tokens to generate. A token represents typically 4 or 5 characters for latin
@@ -255,27 +252,26 @@ impl<'ts, 'e> TextCompletionBuilder<'ts, 'e> {
             .send()
             .await?
             .bytes_stream()
-            .map(|bytes|
+            .map(|bytes| {
                 bytes
                     .map(|bytes| bytes.slice(..bytes.len() - 2))
                     .map(|bytes| serde_json::from_slice::<crate::UntaggedResult<_>>(&bytes))
                     .map(|result| result.map(Into::into))
-            )
+            })
             .pipe(Ok)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use once_cell::sync::Lazy;
-    use test_utils::text_synth;
+    use super::*;
     use crate::prelude::CustomEngineDefinition;
     use crate::test_utils;
-    use super::*;
+    use once_cell::sync::Lazy;
+    use test_utils::text_synth;
 
-    static YOU_SHOULD_CLONE_THIS_BUILDER: Lazy<TextCompletionBuilder> = Lazy::new(|| {
-        text_synth::engine().text_completion("fn main() {".into())
-    });
+    static YOU_SHOULD_CLONE_THIS_BUILDER: Lazy<TextCompletionBuilder> =
+        Lazy::new(|| text_synth::engine().text_completion("fn main() {".into()));
     static BUILDER: Lazy<TextCompletionBuilder> = Lazy::new(|| {
         YOU_SHOULD_CLONE_THIS_BUILDER
             .clone()
@@ -284,9 +280,8 @@ mod tests {
             .top_k(TopK::new(128).unwrap())
             .top_p(TopP::new(0.5).unwrap())
     });
-    static ENGINE_DEFINITION: EngineDefinition = EngineDefinition::Custom(
-        CustomEngineDefinition::r#static("custom", 1024)
-    );
+    static ENGINE_DEFINITION: EngineDefinition =
+        EngineDefinition::Custom(CustomEngineDefinition::r#static("custom", 1024));
 
     #[test]
     fn test_max_tokens_new() {
@@ -351,9 +346,16 @@ mod tests {
         let mut builder = BUILDER.clone();
 
         // v
-        builder.prompt = format!("fn main() {{\n{}}}", "println('Hello World')\n".repeat(2048));
+        builder.prompt = format!(
+            "fn main() {{\n{}}}",
+            "println('Hello World')\n".repeat(2048)
+        );
 
-        let text_completion = builder.now().await.expect("network error").expect("api error");
+        let text_completion = builder
+            .now()
+            .await
+            .expect("network error")
+            .expect("api error");
         assert!(text_completion.truncated_prompt())
     }
 
@@ -369,7 +371,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_text_completion_stream() {
-        fn unwrap_text_completion(text_completion: Option<&TextCompletionStreamResult>) -> &TextCompletion {
+        fn unwrap_text_completion(
+            text_completion: Option<&TextCompletionStreamResult>,
+        ) -> &TextCompletion {
             text_completion
                 .expect("at least one text completion")
                 .as_ref()

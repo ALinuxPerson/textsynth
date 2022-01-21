@@ -1,7 +1,7 @@
-use once_cell::sync::{Lazy, OnceCell};
 use crate::core::TextSynth;
 use crate::engine::Engine;
 use crate::prelude::EngineDefinition;
+use once_cell::sync::{Lazy, OnceCell};
 
 pub const ENGINE_DEFINITION: EngineDefinition = EngineDefinition::GptJ6B;
 static TEXT_SYNTH: OnceCell<TextSynth> = OnceCell::new();

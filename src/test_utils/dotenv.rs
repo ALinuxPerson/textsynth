@@ -1,5 +1,5 @@
-use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 use once_cell::sync::OnceCell;
 
@@ -15,7 +15,7 @@ pub fn initialize() {
             Ok(_) => {
                 INITIALIZED.store(true, ORDERING);
                 Ok(())
-            },
+            }
             Err(error) => {
                 let _ = LAST_ERROR.set(Arc::clone(&error));
                 Err(error)

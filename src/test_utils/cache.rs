@@ -1,7 +1,7 @@
-use once_cell::sync::Lazy;
-use tokio::runtime::Runtime;
 use crate::prelude::{LogProbabilities, NonEmptyString};
 use crate::test_utils::text_synth;
+use once_cell::sync::Lazy;
+use tokio::runtime::Runtime;
 
 #[allow(unused_macros)]
 macro_rules! fallible_cache {
@@ -60,7 +60,11 @@ pub static LOG_PROBABILITIES: Lazy<LogProbabilities> = Lazy::new(|| {
     let async_fn = async {
         let textsynth = text_synth::engine();
         let continuation = NonEmptyString::new("dog".into()).unwrap();
-        textsynth.log_probabilities("The quick brown fox jumps over the lazy ".into(), continuation)
+        textsynth
+            .log_probabilities(
+                "The quick brown fox jumps over the lazy ".into(),
+                continuation,
+            )
             .await
             .expect("network error")
             .expect("api error")

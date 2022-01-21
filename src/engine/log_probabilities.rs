@@ -64,8 +64,8 @@ impl LogProbabilities {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_utils;
     use super::*;
+    use crate::test_utils;
 
     #[test]
     fn test_non_empty_string_new() {

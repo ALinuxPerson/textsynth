@@ -63,9 +63,9 @@ impl<'ts> Engine<'ts> {
 
 #[cfg(test)]
 mod tests {
-    use once_cell::sync::Lazy;
-    use crate::test_utils;
     use super::*;
+    use crate::test_utils;
+    use once_cell::sync::Lazy;
 
     #[test]
     fn test_engine_new() {

@@ -72,7 +72,10 @@ impl private::Sealed for FairseqGpt13B {}
 
 /// A custom engine definition which may or may not exist.
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-#[cfg_attr(feature = "serde_derives", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde_derives",
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub struct CustomEngineDefinition {
     /// The id of this engine definition.
     pub id: Cow<'static, str>,
@@ -111,7 +114,10 @@ impl CustomEngineDefinition {
 
 /// Engine definitions supported by this crate.
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq, Hash)]
-#[cfg_attr(feature = "serde_derives", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde_derives",
+    derive(serde::Serialize, serde::Deserialize)
+)]
 pub enum EngineDefinition {
     /// See [`GptJ6B`] for documentation.
     GptJ6B,
@@ -175,9 +181,18 @@ mod tests {
 
     #[test]
     fn test_engine_definition_to_custom_engine_definition() {
-        assert_eq!(EngineDefinition::GptJ6B.to_custom_engine_definition(), Cow::Owned(GptJ6B::AS_CUSTOM_ENGINE_DEFINITION));
-        assert_eq!(EngineDefinition::Boris6B.to_custom_engine_definition(), Cow::Owned(Boris6B::AS_CUSTOM_ENGINE_DEFINITION));
-        assert_eq!(EngineDefinition::FairseqGpt13B.to_custom_engine_definition(), Cow::Owned(FairseqGpt13B::AS_CUSTOM_ENGINE_DEFINITION));
+        assert_eq!(
+            EngineDefinition::GptJ6B.to_custom_engine_definition(),
+            Cow::Owned(GptJ6B::AS_CUSTOM_ENGINE_DEFINITION)
+        );
+        assert_eq!(
+            EngineDefinition::Boris6B.to_custom_engine_definition(),
+            Cow::Owned(Boris6B::AS_CUSTOM_ENGINE_DEFINITION)
+        );
+        assert_eq!(
+            EngineDefinition::FairseqGpt13B.to_custom_engine_definition(),
+            Cow::Owned(FairseqGpt13B::AS_CUSTOM_ENGINE_DEFINITION)
+        );
 
         let custom_engine_definition = CustomEngineDefinition::new("custom", 42);
         let custom_engine_definition_clone = custom_engine_definition.clone();
@@ -193,14 +208,23 @@ mod tests {
         assert_eq!(EngineDefinition::GptJ6B.id(), GptJ6B::ID);
         assert_eq!(EngineDefinition::Boris6B.id(), Boris6B::ID);
         assert_eq!(EngineDefinition::FairseqGpt13B.id(), FairseqGpt13B::ID);
-        assert_eq!(EngineDefinition::Custom(CustomEngineDefinition::r#static("static", 42)).id(), "static");
+        assert_eq!(
+            EngineDefinition::Custom(CustomEngineDefinition::r#static("static", 42)).id(),
+            "static"
+        );
     }
 
     #[test]
     fn test_engine_definition_max_tokens() {
         assert_eq!(EngineDefinition::GptJ6B.max_tokens(), GptJ6B::MAX_TOKENS);
         assert_eq!(EngineDefinition::Boris6B.max_tokens(), Boris6B::MAX_TOKENS);
-        assert_eq!(EngineDefinition::FairseqGpt13B.max_tokens(), FairseqGpt13B::MAX_TOKENS);
-        assert_eq!(EngineDefinition::Custom(CustomEngineDefinition::r#static("static", 42)).max_tokens(), 42);
+        assert_eq!(
+            EngineDefinition::FairseqGpt13B.max_tokens(),
+            FairseqGpt13B::MAX_TOKENS
+        );
+        assert_eq!(
+            EngineDefinition::Custom(CustomEngineDefinition::r#static("static", 42)).max_tokens(),
+            42
+        );
     }
 }
