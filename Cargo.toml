@@ -2,6 +2,11 @@
 name = "textsynth"
 version = "0.1.0"
 edition = "2021"
+description = "A (unofficial) wrapper for the TextSynth API, a text synthesization service."
+license = "MIT"
+repository = "https://github.com/ALinuxPerson/textsynth"
+keywords = ["api", "textsynth", "machine-learning", "synthesis"]
+categories = ["api-bindings"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
